@@ -1,7 +1,9 @@
 results/
 *.o
 *.po
-*.dep
+*.dep*
 *.swp
 DRAMSim
 libdramsim.so
+libdramsim.a
+.gitignore
