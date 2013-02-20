@@ -11,6 +11,7 @@ CXXFLAGS+=$(OPTFLAGS)
 
 EXE_NAME=DRAMSim
 LIB_NAME=libdramsim.so
+LIB_NAME_STATIC=libdramsim.a
 LIB_NAME_MACOS=libdramsim.dylib
 
 SRC = $(wildcard *.cpp)
@@ -19,14 +20,19 @@ OBJ = $(addsuffix .o, $(basename $(SRC)))
 #build portable objects (i.e. with -fPIC)
 POBJ = $(addsuffix .po, $(basename $(SRC)))
 
-REBUILDABLES=$(OBJ) ${POBJ} $(EXE_NAME) $(LIB_NAME) 
+REBUILDABLES=$(OBJ) ${POBJ} $(EXE_NAME) $(LIB_NAME) $(LIB_NAME_STATIC) 
 
-all: ${EXE_NAME}
+all: ${LIB_NAME_STATIC}
 
 #   $@ target name, $^ target deps, $< matched pattern
 $(EXE_NAME): $(OBJ)
 	$(CXX) $(CXXFLAGS) -o $@ $^ 
 	@echo "Built $@ successfully" 
+
+$(LIB_NAME_STATIC): $(POBJ)
+	ar -cvq $@ $^
+	@echo "Built $@ successfully"
+
 
 $(LIB_NAME): $(POBJ)
 	g++ -g -shared -Wl,-soname,$@ -o $@ $^
@@ -53,7 +59,7 @@ $(LIB_NAME_MACOS): $(POBJ)
 
 #po = portable object .. for lack of a better term
 %.po : %.cpp
-	g++ $(CXXFLAGS) -DLOG_OUTPUT -fPIC -o $@ -c $<
+	g++ $(CXXFLAGS) -g -m32 -DLOG_OUTPUT -fPIC -o $@ -c $<
 
 clean: 
 	-rm -f $(REBUILDABLES) *.dep *.deppo
